@@ -2,3 +2,5 @@ pytorch
 pandas 
 tqdm
 Pillow
+opencv-python
+torchvision

@@ -4,7 +4,7 @@ from os.path import join
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 from torchvision.transforms import Compose, RandomCrop, ToTensor, ToPILImage, CenterCrop, Resize
-
+import numpy as np
 def is_image_file(filename):
     return any(filename.endswith(extension) for extension in ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG'])
 
@@ -31,7 +31,48 @@ def display_transform():
         CenterCrop(400), 
         ToTensor(), 
     ])
+def divide_image(img_array):
 
+    # Get image size
+    height, width, _ = img_array.shape
+
+    # Calculate the size of each piece
+    piece_width = width // 2
+    piece_height = height // 2
+
+    # Divide the image into 4 pieces
+    images = [
+        img_array[0:piece_height, 0:piece_width],  # Top left
+        img_array[0:piece_height, piece_width:width],  # Top right
+        img_array[piece_height:height, 0:piece_width],  # Bottom left
+        img_array[piece_height:height, piece_width:width]  # Bottom right
+    ]
+
+    return images
+def join_images(image_parts):
+    # Assuming all parts are of the same size and are in the correct order
+    top = np.concatenate((image_parts[0], image_parts[1]), axis=1)  # Top left and top right
+    bottom = np.concatenate((image_parts[2], image_parts[3]), axis=1)  # Bottom left and bottom right
+
+    # Join top and bottom parts
+    img_array = np.array(np.concatenate((top, bottom), axis=0))
+
+    return img_array
+
+# def join_images(image_parts):
+#     # Assuming all parts are of the same size
+#     part_width, part_height = image_parts[0].size
+#
+#     # Create a new image of size 2x the width and height of a part
+#     img = Image.new('RGB', (part_width * 2, part_height * 2))
+#
+#     # Paste each part back into the correct position
+#     img.paste(image_parts[0], (0, 0))  # Top left
+#     img.paste(image_parts[1], (part_width, 0))  # Top right
+#     img.paste(image_parts[2], (0, part_height))  # Bottom left
+#     img.paste(image_parts[3], (part_width, part_height))  # Bottom right
+#
+#     return np.array(img)
 
 class TrainDatasetFromFolder(Dataset):
     def __init__(self, dataset_dir, crop_size, upscale_factor):

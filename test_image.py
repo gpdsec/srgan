@@ -10,7 +10,7 @@ from model import Generator
 
 parser = argparse.ArgumentParser(description="Test Single Image")
 parser.add_argument('--upscale_factor', default=4, type=int, help="super resolution upscale factor")
-parser.add_argument('--test_mode', default='GPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
+parser.add_argument('--test_mode', default='CPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
 parser.add_argument('--image_name', type=str, help='test low resolution image name')
 parser.add_argument('--model_name', default='netG_epoch_4_100.pth', type=str, help='generator model epoch name')
 opt = parser.parse_args()
@@ -28,6 +28,7 @@ else:
     model.load_state_dict(torch.load('epochs/' + MODEL_NAME, map_location=lambda storage, loc: storage))
 
 image = Image.open(IMAGE_NAME).convert('RGB')
+print(image)
 image = Variable(ToTensor()(image), volatile=True).unsqueeze(0)
 if TEST_MODE:
     image = image.cuda()
@@ -37,4 +38,4 @@ out = model(image)
 elapsed = (time.time() - start)
 print('cost' + str(elapsed) + 's')
 out_image = ToPILImage()(out[0].data.cpu())
-out_image.save('out_srf_' + str(UPSCALE_FACTOR) + '_' + IMAGE_NAME)
+out_image.save('output/' + str(UPSCALE_FACTOR) + '_' + IMAGE_NAME)
