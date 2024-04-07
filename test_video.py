@@ -1,5 +1,4 @@
 import argparse
-import time
 import cv2
 import numpy as np
 import torch
@@ -8,12 +7,12 @@ from torch.autograd import Variable
 from torchvision.transforms import ToTensor, ToPILImage
 from data_utils import divide_image, join_images
 from model import Generator
-import gc
+# import gc
 
 gc.collect()
 parser = argparse.ArgumentParser(description="Test Single Image")
 parser.add_argument('--upscale_factor', default=4, type=int, help="super resolution upscale factor")
-parser.add_argument('--test_mode', default='CPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
+parser.add_argument('--test_mode', default='GPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
 parser.add_argument('--video_name', type=str, help='test low resolution video name')
 # parser.add_argument('--model_name', default='netG_epoch_4_100.pth', type=str, help='generator model epoch name')
 opt = parser.parse_args()
