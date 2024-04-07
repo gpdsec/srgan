@@ -31,33 +31,35 @@ def display_transform():
         CenterCrop(400), 
         ToTensor(), 
     ])
-def divide_image(img_array):
+def divide_image(image):
+    height, width, _ = image.shape
 
-    # Get image size
-    height, width, _ = img_array.shape
+    # Calculate the size of each part
+    part_height = height // 3
+    part_width = width // 6
 
-    # Calculate the size of each piece
-    piece_width = width // 2
-    piece_height = height // 2
+    # Create a list to store the parts
+    parts = []
 
-    # Divide the image into 4 pieces
-    images = [
-        img_array[0:piece_height, 0:piece_width],  # Top left
-        img_array[0:piece_height, piece_width:width],  # Top right
-        img_array[piece_height:height, 0:piece_width],  # Bottom left
-        img_array[piece_height:height, piece_width:width]  # Bottom right
-    ]
+    # Use numpy slicing to get each part
+    for i in range(3):
+        for j in range(6):
+            part = image[i * part_height:(i + 1) * part_height, j * part_width:(j + 1) * part_width]
+            parts.append(part)
 
-    return images
-def join_images(image_parts):
-    # Assuming all parts are of the same size and are in the correct order
-    top = np.concatenate((image_parts[0], image_parts[1]), axis=1)  # Top left and top right
-    bottom = np.concatenate((image_parts[2], image_parts[3]), axis=1)  # Bottom left and bottom right
+    return parts
+def join_images(parts):
+    rows = []
 
-    # Join top and bottom parts
-    img_array = np.array(np.concatenate((top, bottom), axis=0))
+    # Join each row
+    for i in range(3):
+        row = np.concatenate(parts[i * 6:(i + 1) * 6], axis=1)
+        rows.append(row)
 
-    return img_array
+    # Join all the rows
+    image_reconstructed = np.concatenate(rows, axis=0)
+
+    return image_reconstructed
 
 # def join_images(image_parts):
 #     # Assuming all parts are of the same size

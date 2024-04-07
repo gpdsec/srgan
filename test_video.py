@@ -7,9 +7,9 @@ from torch.autograd import Variable
 from torchvision.transforms import ToTensor, ToPILImage
 from data_utils import divide_image, join_images
 from model import Generator
-# import gc
+import gc
 
-gc.collect()
+# gc.collect()
 parser = argparse.ArgumentParser(description="Test Single Image")
 parser.add_argument('--upscale_factor', default=4, type=int, help="super resolution upscale factor")
 parser.add_argument('--test_mode', default='GPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
@@ -42,12 +42,17 @@ fps = video.get(cv2.CAP_PROP_FPS)
 frame_width = int(video.get(3))
 frame_height = int(video.get(4))
 size = (frame_width*UPSCALE_FACTOR, frame_height*UPSCALE_FACTOR)
-fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-outv = cv2.VideoWriter("output/Processed_Video.mp4", fourcc, 5, size)
+# fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+fps = video.get(cv2.CAP_PROP_FPS)
+outv = cv2.VideoWriter('output/filename.avi',
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         fps, size)
+count = 0
 while True:
   ret, frame = video.read()
   if not ret:
             break
+  count += 1
   images = divide_image(frame)
   out_images = []
   print("it started")
@@ -64,8 +69,10 @@ while True:
       out_images.append(np.array(out_image))
   img = join_images(out_images)
   # print(img.shape)
+  print(count)
   # print(type(img.shape))
   outv.write(img)
+  # cv2.imwrite(f"output/{count+1}.png", img)
 print("*****inferencing finished*****")
 video.release()
-out.release()
+# outv.release()
