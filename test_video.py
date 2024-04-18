@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(description="Test Single Image")
 parser.add_argument('--upscale_factor', default=4, type=int, help="super resolution upscale factor")
 parser.add_argument('--test_mode', default='GPU', type=str, choices=['GPU', 'CPU'], help='using GPU or CPU')
 parser.add_argument('--video_name', type=str, help='test low resolution video name')
+parser.add_argument('--image_mode', type=bool, default=True, help='test low resolution video name')
 # parser.add_argument('--model_name', default='netG_epoch_4_100.pth', type=str, help='generator model epoch name')
 opt = parser.parse_args()
 
@@ -21,6 +22,7 @@ UPSCALE_FACTOR = opt.upscale_factor
 TEST_MODE = True if opt.test_mode == 'GPU' else False
 VIDEO_NAME = opt.video_name
 MODEL_NAME = 'netG_epoch_4_100.pth'
+image_mode = opt.image_mode
 torch.cuda.empty_cache()
 print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 torch.cuda.memory_summary(device="cuda", abbreviated=False)
@@ -55,24 +57,21 @@ while True:
   count += 1
   images = divide_image(frame)
   out_images = []
-  print("it started")
   for image in images:
       image = Image.fromarray(image).convert("RGB")
-      # print(image.shape)
       image = Variable(ToTensor()(image), volatile=True).unsqueeze(0)
-      print("it started")
       if TEST_MODE:
           image = image.cuda()
       out = model(image)
       out_image = ToPILImage()(out[0].data.cpu())
-      # print(type(out_image))
       out_images.append(np.array(out_image))
   img = join_images(out_images)
-  # print(img.shape)
   print(count)
-  # print(type(img.shape))
-  outv.write(img)
-  # cv2.imwrite(f"output/{count+1}.png", img)
+  if image_mode:
+     cv2.imwrite(f"output/{count}.png", img)
+  else:
+     outv.write(img)
+
 print("*****inferencing finished*****")
 video.release()
-# outv.release()
+outv.release()
